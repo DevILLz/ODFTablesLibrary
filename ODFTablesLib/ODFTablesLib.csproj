@@ -44,6 +44,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Cell.cs" />
+    <Compile Include="CellRange.cs" />
     <Compile Include="ODFTablesLib.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

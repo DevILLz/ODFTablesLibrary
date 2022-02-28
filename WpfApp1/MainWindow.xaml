@@ -1,0 +1,20 @@
+﻿<Window x:Class="WpfApp1.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:WpfApp1"
+        mc:Ignorable="d"
+        
+        Title="MainWindow" Height="450" Width="800">
+    <Grid>
+        <DataGrid ItemsSource="{Binding Items}" Margin="0 0 0 30">
+            
+        </DataGrid>
+        <Button VerticalAlignment="Bottom" HorizontalAlignment="Right" Width="100" Height="30" Content="Click me" Click="Save"/>
+        <StackPanel VerticalAlignment="Bottom" HorizontalAlignment="Left" Orientation="Horizontal">
+            <TextBox Height="30" Width="100" Text="{Binding Column}" TextAlignment="Center" VerticalContentAlignment="Center"/>
+            <TextBox Height="30" Width="100" Text="{Binding Row}" TextAlignment="Center" VerticalContentAlignment="Center"/>
+        </StackPanel>
+    </Grid>
+</Window>
