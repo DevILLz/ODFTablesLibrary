@@ -28,7 +28,7 @@ namespace WpfApp1
         {
             InitializeComponent();
             DataContext = this;
-            odf = new ODFTables(Path.GetFullPath(@"C:\Users\serov.KBNT-SEROV\Desktop\Работа\ProtocolTemplates\SA640 temp.ods"));
+            odf = new ODFTables(Path.GetFullPath(@"C:\Users\serov.KBNT-SEROV\Desktop\Работа\ProtocolTemplates\-910018250.odt"));
             cells = odf.Cells;
             Items = new ObservableCollection<Cell>(cells.Cells);
         }
@@ -51,7 +51,7 @@ namespace WpfApp1
         private void Save(object sender, RoutedEventArgs e)
         {
             cells[Row, Column].Value = "xx";
-            odf.Save(@"C:\Users\serov.KBNT-SEROV\Desktop\test.ods");
+            odf.Save(@"C:\Users\serov.KBNT-SEROV\Desktop\test.odt");
 
         }
     }
