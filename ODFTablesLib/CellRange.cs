@@ -6,6 +6,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Xml;
 using System.Xml.Linq;
+using System.Linq;
 
 namespace ODFTablesLib
 {
@@ -18,7 +19,7 @@ namespace ODFTablesLib
         private string TextNS = string.Empty;
         private string TableNS = string.Empty;
         private string OfficeNS = string.Empty;
-        private string CalcextNS = string.Empty;
+        //private string CalcextNS = string.Empty;
         #region Public fields
         public List<Cell> Cells;
         public int TotalRows => _totalRows;
@@ -69,14 +70,14 @@ namespace ODFTablesLib
             
             Cells = new List<Cell>();
             if (NS == null)
-                SearchForNameSpaces(XDocument.Parse(doc.ChildNodes[1].OuterXml));
+                SearchForNameSpaces(doc);
             else
             {
-                var nss = (NS as (string, string, string, string)?).Value;
+                var nss = (NS as (string, string, string)?).Value;
                 TableNS = nss.Item1;
                 OfficeNS = nss.Item2;
-                CalcextNS = nss.Item3;
-                TextNS = nss.Item4;
+                //CalcextNS = nss.Item3;
+                TextNS = nss.Item3;
             }
             EmptyNode = doc.CreateElement("table:p", $"{TextNS}");
             if (!inner)
@@ -85,12 +86,42 @@ namespace ODFTablesLib
                 _totalRows++; // абсолютное значение кол-ва строк, ++ т.к. начинается с 0
             }
         }
-        private void SearchForNameSpaces(XDocument doc)
+        private void SearchForNameSpaces(XmlNode doc)
         {
-            TableNS = doc.Root.GetNamespaceOfPrefix("table").ToString();
-            OfficeNS = doc.Root.GetNamespaceOfPrefix("office").ToString();
-            CalcextNS = doc.Root.GetNamespaceOfPrefix("calcext").ToString();
-            TextNS = doc.Root.GetNamespaceOfPrefix("text").ToString();
+            //TableNS = doc.Root.GetNamespaceOfPrefix("table").ToString();
+            //OfficeNS = doc.Root.GetNamespaceOfPrefix("office").ToString();
+            //CalcextNS = doc.Root.GetNamespaceOfPrefix("calcext").ToString();
+            //TextNS = doc.Root.GetNamespaceOfPrefix("text").ToString();
+            foreach (XmlNode child in doc.ChildNodes)
+            {
+                switch (child.Name)
+                {
+                    case "text:p":
+                        if (child.ParentNode.Name == "table:table-cell")
+                        {
+                            if (String.IsNullOrWhiteSpace(TextNS))
+                            {
+                                TextNS = child.NamespaceURI;
+                                TableNS = child.ParentNode.NamespaceURI;
+                            }
+                            if (String.IsNullOrWhiteSpace(OfficeNS))
+                            {
+                                var atr = child.ParentNode.Attributes;
+                                if (atr.Count > 4)
+                                    for (int i = 0; i < atr.Count; i++)
+                                        if (atr[i].Name.Contains("value-type"))
+                                        {
+                                            OfficeNS = atr[i].NamespaceURI;
+                                            break;
+                                        }
+                            }
+                        }
+                        break;
+                    default:
+                        SearchForNameSpaces(child);
+                        break;
+                }                
+            }
         }
         private XmlNode GetBody(XmlNode node)
         {
@@ -151,7 +182,7 @@ namespace ODFTablesLib
             if (node?.Name.StartsWith("table:table-cell") ?? false)
             {
                 var o = n.Attributes.GetNamedItem("office:value-type");
-                var c = n.Attributes.GetNamedItem("calcext:value-type");
+                //var c = n.Attributes.GetNamedItem("calcext:value-type");
                 if (o != null)
                     o.Value = type;
                 else
@@ -160,14 +191,14 @@ namespace ODFTablesLib
                     off.Value = type;
                     n.Attributes.Append(off);
                 }
-                if (c != null)
-                    c.Value = type;
-                else
-                {
-                    var calc = doc.CreateAttribute("calcext", "value-type", $"{CalcextNS}");
-                    calc.Value = type;
-                    n.Attributes.Append(calc);
-                }
+                //if (c != null)
+                //    c.Value = type;
+                //else
+                //{
+                //    var calc = doc.CreateAttribute("calcext", "value-type", $"{CalcextNS}");
+                //    calc.Value = type;
+                //    n.Attributes.Append(calc);
+                //}
             }
             if (type == "float")
             {
@@ -192,7 +223,7 @@ namespace ODFTablesLib
                 if (rowSpan > 0 || columnSpan > 0)
                 {
                     var oldCell = Cells[Cells.Count - 1];
-                    var m = oldCell.MergedRange = new CellRange(doc, temp, true, (TableNS, TableNS, CalcextNS, TextNS));
+                    var m = oldCell.MergedRange = new CellRange(doc, temp, true, (TableNS, TableNS, /*CalcextNS,*/ TextNS));
                     int i = 0, j = 0;
                     do
                     {
@@ -331,7 +362,7 @@ namespace ODFTablesLib
         }
         public CellRange GetSubrangeRelative(int relativeRow, int relativeColumn, int width, int height)
         {
-            CellRange range = new CellRange(doc, temp, true, (TableNS, TableNS, CalcextNS, TextNS));
+            CellRange range = new CellRange(doc, temp, true, (TableNS, TableNS, /*CalcextNS,*/ TextNS));
             int i = Cells.IndexOf(Cells.FirstOrDefault(x => x.Row == relativeRow));
             int last = Cells.IndexOf(Cells.LastOrDefault(x => x.Row == relativeRow + height - 1));
             for (; i <= last; i++)
@@ -344,7 +375,7 @@ namespace ODFTablesLib
         }
         public CellRange GetSubrangeAbsolute(int FirstRowIndex, int FirstColumnIndex, int LastRowIndex, int LastColumnIndex)
         {
-            var range = new CellRange(doc, temp, true, (TableNS, TableNS, CalcextNS, TextNS));
+            var range = new CellRange(doc, temp, true, (TableNS, TableNS, /*CalcextNS,*/ TextNS));
             for (int i = FirstRowIndex; i <= LastRowIndex; i++)
                 for (int j = FirstColumnIndex; j <= LastColumnIndex; j++)
                     range.Cells.Add(this[i, j]);

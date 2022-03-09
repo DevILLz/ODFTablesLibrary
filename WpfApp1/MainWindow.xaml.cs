@@ -28,7 +28,7 @@ namespace WpfApp1
         {
             InitializeComponent();
             DataContext = this;
-            odf = new ODFTables(Path.GetFullPath(@"C:\Users\serov.KBNT-SEROV\Desktop\Работа\ProtocolTemplates\-910018250.odt"));
+            odf = new ODFTables(Path.GetFullPath(@"C:\Users\serov.KBNT-SEROV\Desktop\испытания тр-ов.ods"));
             cells = odf.Cells;
             Items = new ObservableCollection<Cell>(cells.Cells);
         }
